@@ -1,3 +1,29 @@
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('i');
+const savedTheme = localStorage.getItem('theme') || 'light';
+
+if (savedTheme === 'dark') {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  themeIcon.classList.remove('ti-sun');
+  themeIcon.classList.add('ti-moon');
+}
+
+themeToggle.addEventListener('click', function() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  if (currentTheme === 'dark') {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+    themeIcon.classList.remove('ti-moon');
+    themeIcon.classList.add('ti-sun');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+    themeIcon.classList.remove('ti-sun');
+    themeIcon.classList.add('ti-moon');
+  }
+});
+
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
@@ -31,7 +57,7 @@ const observer = new IntersectionObserver(function(entries) {
   });
 }, observerOptions);
 
-document.querySelectorAll('.product-card, .service-card, .testi-card').forEach(el => {
+document.querySelectorAll('.product-card, .service-card').forEach(el => {
   el.style.opacity = '0';
   el.style.transform = 'translateY(20px)';
   el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';

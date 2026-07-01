@@ -5,16 +5,16 @@
 }
 
 :root {
-  --primary: #10b981;
-  --primary-dark: #059669;
-  --primary-light: #d1fae5;
-  --secondary: #0ea5e9;
-  --dark: #0f172a;
-  --light: #f8fafc;
-  --gray: #64748b;
-  --gray-light: #e2e8f0;
-  --white: #ffffff;
-  --accent: #f59e0b;
+  --primary: #282B4A;
+  --primary-dark: #000000;
+  --primary-light: #EEEBDA;
+  --secondary: #282B4A;
+  --dark: #282B4A;
+  --light: #EEEBDA;
+  --gray: #282B4A;
+  --gray-light: #000000;
+  --white: #FBF9E4;
+  --accent: #282B4A;
 }
 
 body {
@@ -88,6 +88,36 @@ header {
   align-items: center;
 }
 
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--gray-light);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark);
+  transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-light);
+  border-color: var(--dark);
+}
+
+[data-theme="dark"] .theme-toggle {
+  color: var(--primary);
+  border-color: var(--white);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(251, 249, 228, 0.1);
+}
+
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -107,7 +137,7 @@ header {
 .btn-primary:hover {
   background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 20px rgba(40, 43, 74, 0.3);
 }
 
 .btn-outline {
@@ -122,7 +152,7 @@ header {
 
 /* HERO */
 .hero {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, var(--light) 0%, var(--white) 100%);
   padding: 6rem 2rem;
   position: relative;
   overflow: hidden;
@@ -135,7 +165,7 @@ header {
   right: -100px;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(40, 43, 74, 0.1) 0%, transparent 70%);
   border-radius: 50%;
 }
 
@@ -146,7 +176,7 @@ header {
   left: -50px;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(40, 43, 74, 0.08) 0%, transparent 70%);
   border-radius: 50%;
 }
 
@@ -210,7 +240,7 @@ header {
 .hero-visual {
   position: relative;
   height: 400px;
-  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(14, 165, 233, 0.1) 100%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(40, 43, 74, 0.1) 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -354,7 +384,7 @@ header {
 
 .service-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 8px 20px rgba(40, 43, 74, 0.1);
 }
 
 .service-icon {
@@ -432,7 +462,7 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--primary);
   background: var(--white);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgba(40, 43, 74, 0.1);
 }
 
 textarea {
@@ -458,13 +488,13 @@ textarea {
 .submit-btn:hover {
   background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 20px rgba(40, 43, 74, 0.3);
 }
 
 /* FOOTER */
 footer {
   background: var(--dark);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(251, 249, 228, 0.6);
   padding: 3rem 2rem 1rem;
 }
 
@@ -487,7 +517,7 @@ footer {
 .footer-desc {
   font-size: 0.9rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(251, 249, 228, 0.5);
 }
 
 .footer-heading {
@@ -508,22 +538,132 @@ footer {
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(251, 249, 228, 0.6);
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .footer-links a:hover {
-  color: var(--primary);
+  color: var(--primary-light);
+}
+
+[data-theme="dark"] .footer-links a:hover {
+  color: #282B4A;
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(251, 249, 228, 0.1);
   padding-top: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-social {
+  color: rgba(251, 249, 228, 0.6);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-social:hover {
+  color: var(--primary-light);
+}
+
+[data-theme="dark"] .footer-social:hover {
+  color: #282B4A;
+}
+
+/* DARK MODE */
+[data-theme="dark"] {
+  --primary: #EEEBDA;
+  --primary-dark: #000000;
+  --primary-light: #FBF9E4;
+  --secondary: #EEEBDA;
+  --dark: #EEEBDA;
+  --light: #282B4A;
+  --gray: #EEEBDA;
+  --gray-light: #000000;
+  --white: #282B4A;
+  --accent: #EEEBDA;
+}
+
+[data-theme="dark"] footer {
+  background: var(--primary-light);
+  color: rgba(40, 43, 74, 0.7);
+}
+
+[data-theme="dark"] .footer-desc {
+  color: rgba(40, 43, 74, 0.6);
+}
+
+[data-theme="dark"] .footer-heading {
+  color: #282B4A;
+}
+
+[data-theme="dark"] .footer-links a {
+  color: rgba(40, 43, 74, 0.7);
+}
+
+[data-theme="dark"] .footer-links a:hover {
+  color: #282B4A;
+}
+
+[data-theme="dark"] .footer-bottom {
+  border-top-color: rgba(40, 43, 74, 0.2);
+  color: rgba(40, 43, 74, 0.7);
+}
+
+[data-theme="dark"] .hero::before {
+  background: radial-gradient(circle, rgba(238, 235, 218, 0.08) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .hero::after {
+  background: radial-gradient(circle, rgba(238, 235, 218, 0.05) 0%, transparent 70%);
+}
+
+[data-theme="dark"] .hero-visual {
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(238, 235, 218, 0.1) 100%);
+}
+
+[data-theme="dark"] .service-card:hover {
+  box-shadow: 0 8px 20px rgba(238, 235, 218, 0.1);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: rgba(238, 235, 218, 0.1);
+  color: var(--white);
+  border-color: rgba(238, 235, 218, 0.2);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: rgba(238, 235, 218, 0.5);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+  background: var(--primary);
+}
+
+[data-theme="dark"] .submit-btn {
+  color: #282B4A;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 8px 20px rgba(238, 235, 218, 0.2);
+}
+
+[data-theme="dark"] .submit-btn:hover {
+  box-shadow: 0 8px 20px rgba(238, 235, 218, 0.2);
 }
 
 /* RESPONSIVE */
