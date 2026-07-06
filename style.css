@@ -109,6 +109,26 @@ header {
   border-color: var(--dark);
 }
 
+.menu-toggle {
+  display: none;
+  background: none;
+  border: 2px solid var(--gray-light);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark);
+  transition: all 0.3s;
+}
+
+.menu-toggle:hover {
+  background: var(--primary-light);
+  border-color: var(--dark);
+}
+
 [data-theme="dark"] .theme-toggle {
   color: var(--primary);
   border-color: var(--white);
@@ -397,6 +417,17 @@ header {
   justify-content: center;
   font-size: 1.5rem;
   margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+.tag i {
+  font-size: 1rem;
+}
+
+.product-img i {
+  font-size: 3.5rem;
+  color: var(--primary);
+  opacity: 0.85;
 }
 
 .service-name {
@@ -410,6 +441,48 @@ header {
   font-size: 0.95rem;
   color: var(--gray);
   line-height: 1.7;
+}
+
+/* ABOUT SECTION */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.about-desc {
+  color: var(--gray);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: var(--light);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+}
+
+.stat-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-top: 0.25rem;
 }
 
 /* FORM SECTION */
@@ -676,8 +749,40 @@ footer {
     font-size: 2.5rem;
   }
 
+  .menu-toggle {
+    display: flex;
+  }
+
+  .cta-group .btn {
+    display: none;
+  }
+
   .nav {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-light);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 0.5rem 2rem 1rem;
+  }
+
+  .nav.nav-open {
+    display: flex;
+  }
+
+  .nav a {
+    padding: 0.75rem 0;
+    width: 100%;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .nav a:last-child {
+    border-bottom: none;
   }
 
   .section {
@@ -686,6 +791,15 @@ footer {
 
   .section-title {
     font-size: 2rem;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .footer-content {

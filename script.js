@@ -24,6 +24,36 @@ themeToggle.addEventListener('click', function() {
   }
 });
 
+// Mobile menu toggle
+const menuToggle = document.getElementById('menuToggle');
+const siteNav = document.getElementById('siteNav');
+
+if (menuToggle && siteNav) {
+  menuToggle.addEventListener('click', function () {
+    const isOpen = siteNav.classList.toggle('nav-open');
+    menuToggle.setAttribute('aria-expanded', isOpen);
+    menuToggle.querySelector('i').className = isOpen ? 'ti ti-x' : 'ti ti-menu-2';
+  });
+
+  // Close mobile menu when a nav link is tapped
+  siteNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      siteNav.classList.remove('nav-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.querySelector('i').className = 'ti ti-menu-2';
+    });
+  });
+
+  // Close mobile menu when tapping outside of it
+  document.addEventListener('click', (e) => {
+    if (!siteNav.contains(e.target) && !menuToggle.contains(e.target)) {
+      siteNav.classList.remove('nav-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.querySelector('i').className = 'ti ti-menu-2';
+    }
+  });
+}
+
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
@@ -57,7 +87,7 @@ const observer = new IntersectionObserver(function(entries) {
   });
 }, observerOptions);
 
-document.querySelectorAll('.product-card, .service-card').forEach(el => {
+document.querySelectorAll('.product-card, .service-card, .stat-card').forEach(el => {
   el.style.opacity = '0';
   el.style.transform = 'translateY(20px)';
   el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';

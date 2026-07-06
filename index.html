@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="J&D Haven — design, print, and ship custom merchandise with no inventory and no upfront costs.">
   <title>J&D Haven - Custom Merchandise Solutions</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23282B4A'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Arial, sans-serif' font-weight='bold' fill='%23FBF9E4' text-anchor='middle'%3EJ%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,11 +20,11 @@
     <div class="logo-icon">J</div>
     <div>J&D <span>Haven</span></div>
   </div>
-  <nav class="nav">
+  <nav class="nav" id="siteNav">
     <a href="#products">Products</a>
     <a href="#services">Services</a>
-    <a href="#contact">Contact</a>
     <a href="#about">About</a>
+    <a href="#contact">Contact</a>
   </nav>
   <div class="cta-group">
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -30,6 +32,9 @@
     </button>
     <button class="btn btn-outline">Sign In</button>
     <button class="btn btn-primary">Get Started</button>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+      <i class="ti ti-menu-2"></i>
+    </button>
   </div>
 </header>
 
@@ -40,9 +45,9 @@
       <h1>Create & Sell <em>Custom Merchandise</em> Instantly</h1>
       <p>Design, print, and ship branded products directly to your customers. No inventory, no upfront costs—just pure profit.</p>
       <div class="hero-tags">
-        <span class="tag"> Easy Design</span>
-        <span class="tag"> Print Ready</span>
-        <span class="tag"> Global Shipping</span>
+        <span class="tag"><i class="ti ti-pencil"></i> Easy Design</span>
+        <span class="tag"><i class="ti ti-printer"></i> Print Ready</span>
+        <span class="tag"><i class="ti ti-world"></i> Global Shipping</span>
       </div>
       <div class="hero-buttons">
         <button class="btn btn-primary">Start Free Trial</button>
@@ -61,29 +66,31 @@
   </div>
   <div class="products-grid">
     <div class="product-card">
-      <div class="product-img"><img src="#" alt="T-Shirts"></div>
+      <div class="product-img"><i class="ti ti-shirt-sport" aria-hidden="true"></i></div>
       <div class="product-info">
         <p class="product-name">T-Shirts</p>
         <p class="product-sub">Premium quality, all sizes</p>
       </div>
     </div>
     <div class="product-card">
-      <div class="product-img"><img src="#" alt="Hoodies"></div>
+      <div class="product-img"><i class="ti ti-jacket" aria-hidden="true"></i></div>
       <div class="product-info">
         <p class="product-name">Hoodies</p>
         <p class="product-sub">Cozy & comfortable</p>
       </div>
     </div>
     <div class="product-card">
-      <div class="product-img"><img src="#" alt="Mugs"></div>
+      <div class="product-img">
+        <span class="product-badge">Popular</span>
+        <i class="ti ti-cup" aria-hidden="true"></i>
+      </div>
       <div class="product-info">
         <p class="product-name">Mugs</p>
-        <p class="product-badge">Popular</p>
         <p class="product-sub">Custom printed mugs</p>
       </div>
     </div>
     <div class="product-card">
-      <div class="product-img"><img src="#" alt="Notebooks"></div>
+      <div class="product-img"><i class="ti ti-notebook" aria-hidden="true"></i></div>
       <div class="product-info">
         <p class="product-name">Notebooks</p>
         <p class="product-sub">Branded stationery</p>
@@ -101,19 +108,49 @@
     </div>
     <div class="services-grid">
       <div class="service-card">
-        <r>
+        <div class="service-icon"><i class="ti ti-palette" aria-hidden="true"></i></div>
         <p class="service-name">Design & Customize</p>
         <p class="service-desc">Use our intuitive designer to create stunning custom products with your branding, logos, and artwork.</p>
       </div>
       <div class="service-card">
-        <r>
+        <div class="service-icon"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
         <p class="service-name">Quality Assurance</p>
         <p class="service-desc">Every product is carefully inspected before shipping to ensure premium quality and customer satisfaction.</p>
       </div>
       <div class="service-card">
-        <r>
+        <div class="service-icon"><i class="ti ti-truck-delivery" aria-hidden="true"></i></div>
         <p class="service-name">Fast Shipping</p>
         <p class="service-desc">Global delivery network ensures your orders reach customers quickly and reliably worldwide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about" id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <p class="section-label">About Us</p>
+      <h2 class="section-title" style="text-align: left;">Built By Sellers, For Sellers</h2>
+      <p class="about-desc">J&D Haven started with a simple idea: creators and small brands shouldn't need a warehouse to sell great merchandise. We handle the printing, quality checks, and shipping — you focus on your designs and your customers.</p>
+      <p class="about-desc">No inventory to manage, no upfront cost, and no minimum order sizes. Just upload your art, set your prices, and start selling.</p>
+    </div>
+    <div class="about-stats">
+      <div class="stat-card">
+        <p class="stat-number">10k+</p>
+        <p class="stat-label">Products Shipped</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-number">500+</p>
+        <p class="stat-label">Active Sellers</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-number">30+</p>
+        <p class="stat-label">Countries Served</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-number">98%</p>
+        <p class="stat-label">Satisfaction Rate</p>
       </div>
     </div>
   </div>
@@ -179,9 +216,8 @@
     <div>
       <p class="footer-heading">Company</p>
       <ul class="footer-links">
-        <li><a href="#">About</a></li>
-
-        <li><a href="#">Contact</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
       </ul>
     </div>
     <div>
