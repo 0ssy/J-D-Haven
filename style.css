@@ -147,6 +147,9 @@ header {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Sora', sans-serif;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
 }
 
 .btn-primary {
@@ -458,31 +461,37 @@ header {
   margin-bottom: 1.25rem;
 }
 
-.about-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+.about-values {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.stat-card {
+.value-card {
   background: var(--light);
   border: 1px solid var(--gray-light);
   border-radius: 12px;
-  padding: 1.75rem 1.25rem;
-  text-align: center;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.stat-number {
+.value-card .service-icon {
+  margin-bottom: 0.25rem;
+}
+
+.stat-label-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--dark);
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--gray);
-  margin-top: 0.25rem;
+  line-height: 1.6;
 }
 
 /* FORM SECTION */
@@ -798,8 +807,8 @@ footer {
     gap: 2.5rem;
   }
 
-  .about-stats {
-    grid-template-columns: repeat(2, 1fr);
+  .about-values {
+    gap: 1rem;
   }
 
   .footer-content {

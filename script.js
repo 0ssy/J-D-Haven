@@ -68,7 +68,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Form submission
 document.getElementById('contactForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  alert('Thank you for your inquiry! We will contact you soon.');
+  alert('Thanks for your order request! I\'ll get back to you personally soon.');
   this.reset();
 });
 
@@ -87,7 +87,7 @@ const observer = new IntersectionObserver(function(entries) {
   });
 }, observerOptions);
 
-document.querySelectorAll('.product-card, .service-card, .stat-card').forEach(el => {
+document.querySelectorAll('.product-card, .service-card, .value-card').forEach(el => {
   el.style.opacity = '0';
   el.style.transform = 'translateY(20px)';
   el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
