@@ -1,5 +1,11 @@
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const TOAST_CONTAINER_ID = 'toastContainer';
+const SELLER_WHATSAPP = '254721379961';
+const SELLER_EMAIL = 'jdhaven726@gmail.com';
+const PAYMENT_METHOD = 'M-Pesa (Send Money)';
+const PAYMENT_NUMBER = '+254 721 379 961';
+const PAYMENT_NAME = 'J&D HAVEN';
+const ORDER_SUBMIT_COOLDOWN_MS = 15000;
 
 function getToastContainer() {
   let container = document.getElementById(TOAST_CONTAINER_ID);
@@ -91,6 +97,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 let cart = [];
+let lastOrderSubmitAt = 0;
+let allProducts = [];
+let activeCategory = 'all';
+
+function formatCurrency(amount) {
+  return `KSh ${amount.toFixed(2)}`;
+}
 
 function createOrderId() {
   if (window.crypto && typeof window.crypto.randomUUID === 'function') {
@@ -108,6 +121,52 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function renderOrderConfirmation(orderId, items, totalAmount) {
+  const confirmationSection = document.getElementById('orderConfirmation');
+  if (!confirmationSection) {
+    return;
+  }
+
+  const shortRef = orderId.slice(0, 8);
+  const itemSummary = items.map(item => `${item.name} × ${item.quantity}`).join(', ');
+  const whatsappText = encodeURIComponent(
+    `Hi J&D Haven, I have completed payment for order #${shortRef}.\nAmount: ${formatCurrency(totalAmount)}\nItems: ${itemSummary}`
+  );
+  const whatsappUrl = `https://wa.me/${SELLER_WHATSAPP}?text=${whatsappText}`;
+
+  confirmationSection.hidden = false;
+  confirmationSection.innerHTML = `
+    <h3>Order Submitted Successfully</h3>
+    <p><strong>Reference:</strong> #${shortRef}</p>
+    <p><strong>Total Amount:</strong> ${formatCurrency(totalAmount)}</p>
+    <ul class="order-confirmation-list">
+      ${items.map(item => `<li>${item.name} × ${item.quantity} — ${formatCurrency(item.price * item.quantity)}</li>`).join('')}
+    </ul>
+    <div class="payment-details">
+      <p><strong>Payment Instructions</strong></p>
+      <p>Method: ${PAYMENT_METHOD}</p>
+      <p>Number: ${PAYMENT_NUMBER}</p>
+      <p>Name: ${PAYMENT_NAME}</p>
+      <p>After payment, send your confirmation with order ref <strong>#${shortRef}</strong>.</p>
+    </div>
+    <div class="confirmation-actions">
+      <a href="${whatsappUrl}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Send Confirmation on WhatsApp</a>
+      <a href="mailto:${SELLER_EMAIL}?subject=Payment%20Confirmation%20Order%20%23${shortRef}" class="btn btn-outline">Send via Email</a>
+    </div>
+  `;
+  confirmationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function sendOrderConfirmationEmail(payload) {
+  const { error } = await supabaseClient.functions.invoke('order-confirmation', {
+    body: payload
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
 function animateProductCards() {
   document.querySelectorAll('.product-card').forEach(el => {
     if (el.dataset.animated === 'true') {
@@ -119,6 +178,80 @@ function animateProductCards() {
     el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(el);
     el.dataset.animated = 'true';
+  });
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) {
+    return;
+  }
+
+  const filteredProducts = activeCategory === 'all'
+    ? allProducts
+    : allProducts.filter(product => product.category_id === activeCategory);
+
+  if (!filteredProducts.length) {
+    grid.innerHTML = '<p>No products in this category yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = filteredProducts.map(p => {
+    const inStock = p.in_stock !== false;
+    const leadTimeDays = Number.isFinite(Number(p.lead_time_days)) ? Number(p.lead_time_days) : null;
+    const availabilityText = inStock
+      ? (leadTimeDays ? `Made to order - ships in about ${leadTimeDays} day${leadTimeDays === 1 ? '' : 's'}` : 'Made to order')
+      : 'Currently unavailable';
+    const notifyText = encodeURIComponent(`Hi J&D Haven, please notify me when "${p.name}" is back in stock.`);
+    const notifyUrl = `https://wa.me/${SELLER_WHATSAPP}?text=${notifyText}`;
+
+    return `
+    <div class="product-card" data-product-id="${p.id}" data-price="${p.price}">
+      <div class="product-img">
+        ${inStock ? '' : '<span class="product-badge out-stock-badge">Back Soon</span>'}
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : ''}
+      </div>
+      <div class="product-info">
+        <p class="product-name">${p.name}</p>
+        <p class="product-sub">${p.description ?? ''}</p>
+        <p class="product-availability ${inStock ? 'is-available' : 'is-unavailable'}">${availabilityText}</p>
+        <p class="product-price">KSh ${p.price}</p>
+        ${inStock
+          ? `<button class="btn btn-primary add-to-order" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">Add to Order</button>`
+          : `<a class="btn btn-outline notify-stock-btn" href="${notifyUrl}" target="_blank" rel="noopener noreferrer">Notify me on WhatsApp</a>`
+        }
+      </div>
+    </div>
+  `;
+  }).join('');
+
+  animateProductCards();
+}
+
+async function loadCategories() {
+  const filterBar = document.getElementById('categoryFilters');
+  if (!filterBar) {
+    return;
+  }
+
+  const { data: categories, error } = await supabaseClient
+    .from('categories')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error loading categories:', error);
+    return;
+  }
+
+  filterBar.innerHTML = '<button class="filter-btn active" data-category="all">All</button>';
+  categories.forEach(category => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.type = 'button';
+    btn.dataset.category = category.id;
+    btn.textContent = category.name;
+    filterBar.appendChild(btn);
   });
 }
 
@@ -136,7 +269,7 @@ async function loadProducts() {
 
   const { data: products, error } = await supabaseClient
     .from('products')
-    .select('*')
+    .select('*, categories(name)')
     .eq('active', true)
     .order('created_at', { ascending: true });
 
@@ -151,23 +284,8 @@ async function loadProducts() {
     return;
   }
 
-  grid.innerHTML = products.map(p => `
-    <div class="product-card" data-product-id="${p.id}" data-price="${p.price}">
-      <div class="product-img">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : ''}
-      </div>
-      <div class="product-info">
-        <p class="product-name">${p.name}</p>
-        <p class="product-sub">${p.description ?? ''}</p>
-        <p class="product-price">KSh ${p.price}</p>
-        <button class="btn btn-primary add-to-order" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">
-          Add to Order
-        </button>
-      </div>
-    </div>
-  `).join('');
-
-  animateProductCards();
+  allProducts = products;
+  renderProducts();
 }
 
 function renderCart() {
@@ -230,6 +348,20 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
     return;
   }
 
+  const honeypotField = document.getElementById('websiteField');
+  if (honeypotField.value.trim()) {
+    console.warn('Spam-like form submission blocked by honeypot.');
+    showToast('Unable to submit this order request.', 'error');
+    return;
+  }
+
+  const now = Date.now();
+  if (now - lastOrderSubmitAt < ORDER_SUBMIT_COOLDOWN_MS) {
+    const waitSeconds = Math.ceil((ORDER_SUBMIT_COOLDOWN_MS - (now - lastOrderSubmitAt)) / 1000);
+    showToast(`Please wait ${waitSeconds}s before submitting another order.`, 'error');
+    return;
+  }
+
   if (!cart.length) {
     showToast('Please add at least one product to your order first.', 'error');
     return;
@@ -238,8 +370,15 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
   const submitBtn = e.target.querySelector('.submit-btn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
+  const confirmationSection = document.getElementById('orderConfirmation');
+  if (confirmationSection) {
+    confirmationSection.hidden = true;
+  }
 
   try {
+    lastOrderSubmitAt = now;
+    const orderItemsSnapshot = cart.map(item => ({ ...item }));
+    const totalAmount = orderItemsSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const orderId = createOrderId();
     const { error: orderError } = await supabaseClient
       .from('orders')
@@ -287,7 +426,22 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
       throw itemsError;
     }
 
-    showToast(`Order received! Reference #${orderId.slice(0, 8)}. Please send payment confirmation via WhatsApp or email.`, 'success', 5000);
+    renderOrderConfirmation(orderId, orderItemsSnapshot, totalAmount);
+    showToast(`Order received! Reference #${orderId.slice(0, 8)}.`, 'success', 5000);
+
+    try {
+      await sendOrderConfirmationEmail({
+        orderId,
+        customerName: document.getElementById('custName').value.trim(),
+        customerEmail: normalizedEmail,
+        totalAmount
+      });
+      showToast('A confirmation email has been sent.', 'info');
+    } catch (emailError) {
+      console.error(emailError);
+      showToast('Order saved, but confirmation email could not be sent right now.', 'error', 5000);
+    }
+
     cart = [];
     renderCart();
     e.target.reset();
@@ -323,6 +477,21 @@ document.querySelectorAll('.product-card, .service-card, .value-card').forEach(e
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  const filterBar = document.getElementById('categoryFilters');
+  if (filterBar) {
+    filterBar.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains('filter-btn')) {
+        return;
+      }
+      filterBar.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      target.classList.add('active');
+      activeCategory = target.dataset.category || 'all';
+      renderProducts();
+    });
+  }
+
+  loadCategories();
   loadProducts();
   renderCart();
 });

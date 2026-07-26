@@ -324,6 +324,29 @@ header {
   gap: 2rem;
 }
 
+.category-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+}
+
+.filter-btn.active {
+  background: var(--primary);
+  color: var(--white);
+}
+
 .product-card {
   background: var(--white);
   border: 1px solid var(--gray-light);
@@ -370,6 +393,10 @@ header {
   text-transform: uppercase;
 }
 
+.out-stock-badge {
+  background: #b00020;
+}
+
 .product-info {
   padding: 1.5rem;
 }
@@ -391,6 +418,30 @@ header {
   margin-bottom: 0.9rem;
   font-weight: 700;
   color: var(--dark);
+}
+
+.product-availability {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.product-availability.is-available {
+  color: #22863a;
+}
+
+.product-availability.is-unavailable {
+  color: #b00020;
+}
+
+.add-to-order:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+.notify-stock-btn {
+  width: 100%;
 }
 
 /* SERVICES SECTION */
@@ -580,6 +631,14 @@ header {
   grid-column: 1 / -1;
 }
 
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 label {
   font-size: 0.9rem;
   font-weight: 600;
@@ -653,6 +712,45 @@ textarea {
   background: var(--primary-dark);
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(40, 43, 74, 0.3);
+}
+
+.order-confirmation {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  background: var(--light);
+}
+
+.order-confirmation h3 {
+  margin-bottom: 0.4rem;
+}
+
+.order-confirmation p {
+  margin-bottom: 0.45rem;
+}
+
+.order-confirmation-list {
+  list-style: none;
+  margin: 0.55rem 0;
+}
+
+.order-confirmation-list li {
+  margin-bottom: 0.25rem;
+}
+
+.payment-details {
+  margin-top: 0.6rem;
+  padding: 0.7rem;
+  border-radius: 8px;
+  background: rgba(40, 43, 74, 0.08);
+}
+
+.confirmation-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .contact-channels {
@@ -840,6 +938,14 @@ footer {
   color: #282B4A;
 }
 
+[data-theme="dark"] .product-availability.is-available {
+  color: #7edc9a;
+}
+
+[data-theme="dark"] .product-availability.is-unavailable {
+  color: #ff9ca6;
+}
+
 [data-theme="dark"] input,
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
@@ -895,6 +1001,15 @@ footer {
   border-color: rgba(238, 235, 218, 0.3);
 }
 
+[data-theme="dark"] .order-confirmation {
+  border-color: rgba(238, 235, 218, 0.25);
+  background: rgba(238, 235, 218, 0.08);
+}
+
+[data-theme="dark"] .payment-details {
+  background: rgba(238, 235, 218, 0.15);
+}
+
 [data-theme="dark"] input[type="file"]::file-selector-button {
   border-color: rgba(238, 235, 218, 0.35);
   background: rgba(238, 235, 218, 0.15);
@@ -943,6 +1058,16 @@ footer {
   grid-template-columns: 1fr;
   gap: 0.9rem;
   margin-bottom: 1.25rem;
+}
+
+.admin-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.9rem;
+  margin-bottom: 0;
 }
 
 #productForm .btn {
@@ -998,6 +1123,15 @@ footer {
 
 .admin-order-card li {
   margin-bottom: 0.4rem;
+}
+
+.close-order-btn {
+  margin-top: 0.45rem;
+}
+
+.no-design-file {
+  opacity: 0.8;
+  font-size: 0.85rem;
 }
 
 .admin-inline-btn {
@@ -1056,6 +1190,15 @@ footer {
 
 [data-theme="dark"] .admin-subtitle {
   color: rgba(238, 235, 218, 0.75);
+}
+
+[data-theme="dark"] .filter-btn {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .filter-btn.active {
+  color: #282B4A;
 }
 
 /* TOASTS */

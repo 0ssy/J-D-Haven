@@ -71,6 +71,9 @@
     <p class="section-label">Featured Products</p>
     <h2 class="section-title">What You Can Create</h2>
   </div>
+  <div class="category-filters" id="categoryFilters">
+    <button class="filter-btn active" data-category="all">All</button>
+  </div>
   <div class="products-grid" id="productsGrid">
     <!-- populated by script.js -->
   </div>
@@ -166,9 +169,14 @@
           <label>Notes</label>
           <textarea id="custNotes" placeholder="Sizes, colors, special instructions"></textarea>
         </div>
+        <div class="form-group full honeypot-field" aria-hidden="true">
+          <label for="websiteField">Website</label>
+          <input type="text" id="websiteField" name="websiteField" autocomplete="off" tabindex="-1">
+        </div>
       </div>
       <button type="submit" class="submit-btn">Send Order Request</button>
     </form>
+    <section id="orderConfirmation" class="order-confirmation" hidden aria-live="polite"></section>
     <div class="contact-channels" aria-label="Owner contact channels">
       <a class="contact-channel" href="mailto:jdhaven726@gmail.com">
         <i class="ti ti-mail" aria-hidden="true"></i>
