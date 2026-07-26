@@ -1,11 +1,83 @@
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const TOAST_CONTAINER_ID = 'toastContainer';
+
+function getToastContainer() {
+  let container = document.getElementById(TOAST_CONTAINER_ID);
+  if (!container) {
+    container = document.createElement('div');
+    container.id = TOAST_CONTAINER_ID;
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
+function showToast(message, type = 'info', timeout = 3500) {
+  const container = getToastContainer();
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  window.setTimeout(() => {
+    toast.remove();
+  }, timeout);
+}
 
 const loginView = document.getElementById('loginView');
 const adminView = document.getElementById('adminView');
+const orderSearchInput = document.getElementById('orderSearch');
+const orderStatusFilter = document.getElementById('orderStatusFilter');
+const statusOptions = ['pending', 'paid', 'in_production', 'shipped', 'delivered'];
+let adminOrders = [];
+let adminControlsInitialized = false;
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function formatStatusLabel(status) {
+  return status.replaceAll('_', ' ');
+}
+
+function filterOrders() {
+  const searchTerm = orderSearchInput.value.trim().toLowerCase();
+  const statusFilter = orderStatusFilter.value;
+
+  const filtered = adminOrders.filter(order => {
+    const matchesSearch = !searchTerm
+      || order.customer_name.toLowerCase().includes(searchTerm)
+      || order.email.toLowerCase().includes(searchTerm);
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  renderOrders(filtered);
+}
+
+function initAdminControls() {
+  if (adminControlsInitialized) {
+    return;
+  }
+
+  orderSearchInput.addEventListener('input', filterOrders);
+  orderStatusFilter.addEventListener('change', filterOrders);
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      showToast('Could not log out: ' + error.message, 'error');
+      return;
+    }
+    showToast('You have been logged out.', 'success');
+    await checkSession();
+  });
+
+  adminControlsInitialized = true;
+}
 
 async function checkSession() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
+    initAdminControls();
     loginView.style.display = 'none';
     adminView.style.display = 'block';
     await loadAdminProducts();
@@ -17,23 +89,44 @@ async function checkSession() {
 }
 
 document.getElementById('loginBtn').addEventListener('click', async () => {
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const password = document.getElementById('loginPassword').value;
+
+  if (!isValidEmail(email)) {
+    showToast('Please enter a valid admin email address.', 'error');
+    return;
+  }
+
+  if (!password) {
+    showToast('Please enter your password.', 'error');
+    return;
+  }
 
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
-    alert('Login failed: ' + error.message);
+    showToast('Login failed: ' + error.message, 'error');
     return;
   }
+  showToast('Logged in successfully.', 'success');
   await checkSession();
 });
 
 document.getElementById('addProductBtn').addEventListener('click', async () => {
-  const name = document.getElementById('pName').value;
-  const description = document.getElementById('pDesc').value;
+  const name = document.getElementById('pName').value.trim();
+  const description = document.getElementById('pDesc').value.trim();
   const price = parseFloat(document.getElementById('pPrice').value);
-  const category = document.getElementById('pCategory').value;
+  const category = document.getElementById('pCategory').value.trim();
   const imageFile = document.getElementById('pImage').files[0];
+
+  if (!name) {
+    showToast('Product name is required.', 'error');
+    return;
+  }
+
+  if (!Number.isFinite(price) || price <= 0) {
+    showToast('Please enter a valid product price.', 'error');
+    return;
+  }
 
   let imageUrl = null;
   if (imageFile) {
@@ -43,7 +136,7 @@ document.getElementById('addProductBtn').addEventListener('click', async () => {
       .upload(filePath, imageFile);
 
     if (uploadError) {
-      alert('Image upload failed: ' + uploadError.message);
+      showToast('Image upload failed: ' + uploadError.message, 'error');
       return;
     }
 
@@ -58,11 +151,11 @@ document.getElementById('addProductBtn').addEventListener('click', async () => {
   });
 
   if (error) {
-    alert('Error adding product: ' + error.message);
+    showToast('Error adding product: ' + error.message, 'error');
     return;
   }
 
-  alert('Product added.');
+  showToast('Product added.', 'success');
   document.getElementById('pName').value = '';
   document.getElementById('pDesc').value = '';
   document.getElementById('pPrice').value = '';
@@ -101,9 +194,10 @@ async function loadAdminProducts() {
         .update({ active: !currentlyActive })
         .eq('id', id);
       if (toggleError) {
-        alert('Unable to update product visibility: ' + toggleError.message);
+        showToast('Unable to update product visibility: ' + toggleError.message, 'error');
         return;
       }
+      showToast('Product visibility updated.', 'success');
       await loadAdminProducts();
     });
   });
@@ -118,9 +212,10 @@ async function loadAdminProducts() {
         .delete()
         .eq('id', btn.dataset.delete);
       if (deleteError) {
-        alert('Unable to delete product: ' + deleteError.message);
+        showToast('Unable to delete product: ' + deleteError.message, 'error');
         return;
       }
+      showToast('Product deleted.', 'success');
       await loadAdminProducts();
     });
   });
@@ -140,11 +235,17 @@ async function loadAdminOrders() {
     return;
   }
 
-  const statuses = ['pending', 'paid', 'in_production', 'shipped', 'delivered'];
+  adminOrders = orders ?? [];
+  filterOrders();
+}
 
+function renderOrders(orders) {
   document.getElementById('ordersList').innerHTML = orders.map(o => `
     <div class="admin-order-card">
-      <p><strong>${o.customer_name}</strong> - ${o.email} - ${o.phone ?? ''}</p>
+      <p>
+        <strong>${o.customer_name}</strong> - ${o.email} - ${o.phone ?? ''}
+        <span class="status-pill status-${o.status}">${formatStatusLabel(o.status)}</span>
+      </p>
       <p>${o.shipping_address}</p>
       <p>Notes: ${o.notes ?? '-'}</p>
       <ul>
@@ -155,11 +256,11 @@ async function loadAdminOrders() {
       </ul>
       <label>Status:
         <select data-order="${o.id}">
-          ${statuses.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+          ${statusOptions.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${formatStatusLabel(s)}</option>`).join('')}
         </select>
       </label>
     </div>
-  `).join('');
+  `).join('') || '<p>No matching orders found.</p>';
 
   document.querySelectorAll('[data-order]').forEach(select => {
     select.addEventListener('change', async () => {
@@ -168,8 +269,16 @@ async function loadAdminOrders() {
         .update({ status: select.value })
         .eq('id', select.dataset.order);
       if (statusError) {
-        alert('Unable to update order status: ' + statusError.message);
+        showToast('Unable to update order status: ' + statusError.message, 'error');
+        return;
       }
+      showToast('Order status updated.', 'success');
+
+      const updated = adminOrders.find(order => order.id === select.dataset.order);
+      if (updated) {
+        updated.status = select.value;
+      }
+      filterOrders();
     });
   });
 
@@ -181,7 +290,7 @@ async function loadAdminOrders() {
         .createSignedUrl(filePath, 3600);
 
       if (signedUrlError) {
-        alert('Unable to open design file: ' + signedUrlError.message);
+        showToast('Unable to open design file: ' + signedUrlError.message, 'error');
         return;
       }
 

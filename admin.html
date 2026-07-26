@@ -11,13 +11,18 @@
     <div id="loginView" class="admin-panel">
       <h2>Admin Login</h2>
       <div class="admin-form-grid">
-        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" title="Enter a valid email address">
         <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
         <button id="loginBtn" class="btn btn-primary">Log In</button>
       </div>
     </div>
 
     <div id="adminView" class="admin-panel" style="display:none;">
+      <div class="admin-topbar">
+        <p class="admin-subtitle">Manage storefront products and customer orders.</p>
+        <button id="logoutBtn" class="btn btn-outline" type="button">Log Out</button>
+      </div>
+
       <h2>Products</h2>
       <div id="productForm" class="admin-form-grid">
         <input type="text" id="pName" placeholder="Product name">
@@ -30,6 +35,17 @@
       <div id="productsList"></div>
 
       <h2>Orders</h2>
+      <div class="admin-order-controls">
+        <input type="search" id="orderSearch" placeholder="Search by name or email">
+        <select id="orderStatusFilter" title="Filter orders by status">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="in_production">In production</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
       <div id="ordersList"></div>
     </div>
   </main>

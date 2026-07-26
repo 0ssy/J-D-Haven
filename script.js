@@ -1,4 +1,27 @@
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const TOAST_CONTAINER_ID = 'toastContainer';
+
+function getToastContainer() {
+  let container = document.getElementById(TOAST_CONTAINER_ID);
+  if (!container) {
+    container = document.createElement('div');
+    container.id = TOAST_CONTAINER_ID;
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
+function showToast(message, type = 'info', timeout = 3500) {
+  const container = getToastContainer();
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  window.setTimeout(() => {
+    toast.remove();
+  }, timeout);
+}
 
 // Theme toggle
 const themeToggle = document.getElementById('themeToggle');
@@ -79,6 +102,10 @@ function createOrderId() {
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function animateProductCards() {
@@ -194,9 +221,17 @@ document.addEventListener('click', (e) => {
 
 document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const emailInput = document.getElementById('custEmail');
+  const normalizedEmail = emailInput.value.trim().toLowerCase();
+
+  if (!isValidEmail(normalizedEmail)) {
+    showToast('Please enter a valid email address before submitting your order.', 'error');
+    emailInput.focus();
+    return;
+  }
 
   if (!cart.length) {
-    alert('Please add at least one product to your order first.');
+    showToast('Please add at least one product to your order first.', 'error');
     return;
   }
 
@@ -211,7 +246,7 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
       .insert({
         id: orderId,
         customer_name: document.getElementById('custName').value,
-        email: document.getElementById('custEmail').value,
+        email: normalizedEmail,
         phone: document.getElementById('custPhone').value,
         shipping_address: document.getElementById('custAddress').value,
         notes: document.getElementById('custNotes').value
@@ -252,13 +287,13 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
       throw itemsError;
     }
 
-    alert(`Order received! Reference #${orderId.slice(0, 8)}. Please send payment confirmation via WhatsApp or email.`);
+    showToast(`Order received! Reference #${orderId.slice(0, 8)}. Please send payment confirmation via WhatsApp or email.`, 'success', 5000);
     cart = [];
     renderCart();
     e.target.reset();
   } catch (err) {
     console.error(err);
-    alert(`Something went wrong submitting your order: ${err.message}`);
+    showToast(`Something went wrong submitting your order: ${err.message}`, 'error', 5000);
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Send Order Request';
