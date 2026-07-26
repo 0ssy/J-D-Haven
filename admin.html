@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J&D Haven - Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="admin-page">
+    <div id="loginView" class="admin-panel">
+      <h2>Admin Login</h2>
+      <div class="admin-form-grid">
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+        <button id="loginBtn" class="btn btn-primary">Log In</button>
+      </div>
+    </div>
+
+    <div id="adminView" class="admin-panel" style="display:none;">
+      <h2>Products</h2>
+      <div id="productForm" class="admin-form-grid">
+        <input type="text" id="pName" placeholder="Product name">
+        <textarea id="pDesc" placeholder="Description"></textarea>
+        <input type="number" id="pPrice" placeholder="Price">
+        <input type="text" id="pCategory" placeholder="Category">
+        <input type="file" id="pImage" accept="image/*">
+        <button id="addProductBtn" class="btn btn-primary">Add Product</button>
+      </div>
+      <div id="productsList"></div>
+
+      <h2>Orders</h2>
+      <div id="ordersList"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

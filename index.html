@@ -71,38 +71,8 @@
     <p class="section-label">Featured Products</p>
     <h2 class="section-title">What You Can Create</h2>
   </div>
-  <div class="products-grid">
-    <div class="product-card">
-      <div class="product-img"><i class="ti ti-shirt-sport" aria-hidden="true"></i></div>
-      <div class="product-info">
-        <p class="product-name">T-Shirts</p>
-        <p class="product-sub">Premium quality, all sizes</p>
-      </div>
-    </div>
-    <div class="product-card">
-      <div class="product-img"><i class="ti ti-jacket" aria-hidden="true"></i></div>
-      <div class="product-info">
-        <p class="product-name">Hoodies</p>
-        <p class="product-sub">Cozy & comfortable</p>
-      </div>
-    </div>
-    <div class="product-card">
-      <div class="product-img">
-        <span class="product-badge">Popular</span>
-        <i class="ti ti-cup" aria-hidden="true"></i>
-      </div>
-      <div class="product-info">
-        <p class="product-name">Mugs</p>
-        <p class="product-sub">Custom printed mugs</p>
-      </div>
-    </div>
-    <div class="product-card">
-      <div class="product-img"><i class="ti ti-notebook" aria-hidden="true"></i></div>
-      <div class="product-info">
-        <p class="product-name">Notebooks</p>
-        <p class="product-sub">Branded stationery</p>
-      </div>
-    </div>
+  <div class="products-grid" id="productsGrid">
+    <!-- populated by script.js -->
   </div>
 </section>
 
@@ -169,33 +139,32 @@
       <p class="section-label">Get In Touch</p>
       <h2 class="section-title">Place An Order</h2>
     </div>
+    <div id="cartSummary"></div>
     <form id="contactForm">
       <div class="form-grid">
         <div class="form-group">
           <label>Name</label>
-          <input type="text" placeholder="Your full name" required>
+          <input type="text" id="custName" placeholder="Your full name" required>
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" placeholder="your@email.com" required>
+          <input type="email" id="custEmail" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label>Quantity</label>
-          <input type="number" min="1" placeholder="How many?">
-        </div>
-        <div class="form-group">
-          <label>Product</label>
-          <select required title="Product selection">
-            <option value="">Select a product</option>
-            <option value="tshirt">T-Shirts</option>
-            <option value="hoodie">Hoodies</option>
-            <option value="mug">Mugs</option>
-            <option value="notebook">Notebooks</option>
-          </select>
+          <label>Phone</label>
+          <input type="text" id="custPhone" placeholder="e.g. 07XXXXXXXX">
         </div>
         <div class="form-group full">
-          <label>Message</label>
-          <textarea placeholder="Tell me what you're looking for — design ideas, sizes, colors, anything helps" required></textarea>
+          <label>Shipping Address</label>
+          <textarea id="custAddress" placeholder="Full delivery address" required></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Design File (optional)</label>
+          <input type="file" id="designFile" accept="image/*,.pdf">
+        </div>
+        <div class="form-group full">
+          <label>Notes</label>
+          <textarea id="custNotes" placeholder="Sizes, colors, special instructions"></textarea>
         </div>
       </div>
       <button type="submit" class="submit-btn">Send Order Request</button>
@@ -265,6 +234,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

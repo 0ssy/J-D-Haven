@@ -1,3 +1,5 @@
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Theme toggle
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = themeToggle.querySelector('i');
@@ -65,11 +67,202 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Form submission
-document.getElementById('contactForm').addEventListener('submit', function(e) {
+let cart = [];
+
+function createOrderId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function animateProductCards() {
+  document.querySelectorAll('.product-card').forEach(el => {
+    if (el.dataset.animated === 'true') {
+      return;
+    }
+
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+    el.dataset.animated = 'true';
+  });
+}
+
+async function loadProducts() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) {
+    return;
+  }
+
+  if (typeof supabaseClient === 'undefined') {
+    console.error('Supabase client is not initialized.');
+    grid.innerHTML = '<p>Unable to load products right now.</p>';
+    return;
+  }
+
+  const { data: products, error } = await supabaseClient
+    .from('products')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error loading products:', error);
+    grid.innerHTML = '<p>Unable to load products right now.</p>';
+    return;
+  }
+
+  if (!products.length) {
+    grid.innerHTML = '<p>No products available yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" data-product-id="${p.id}" data-price="${p.price}">
+      <div class="product-img">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : ''}
+      </div>
+      <div class="product-info">
+        <p class="product-name">${p.name}</p>
+        <p class="product-sub">${p.description ?? ''}</p>
+        <p class="product-price">KSh ${p.price}</p>
+        <button class="btn btn-primary add-to-order" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">
+          Add to Order
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  animateProductCards();
+}
+
+function renderCart() {
+  const cartEl = document.getElementById('cartSummary');
+  if (!cartEl) {
+    return;
+  }
+
+  if (!cart.length) {
+    cartEl.innerHTML = '<p>No items added yet.</p>';
+    return;
+  }
+
+  const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  cartEl.innerHTML = `
+    <ul class="cart-list">
+      ${cart.map((item, idx) => `
+        <li>
+          ${item.name} × ${item.quantity} — KSh ${item.price * item.quantity}
+          <button type="button" data-remove="${idx}">Remove</button>
+        </li>
+      `).join('')}
+    </ul>
+    <p><strong>Total: KSh ${total}</strong></p>
+  `;
+
+  cartEl.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      cart.splice(parseInt(btn.dataset.remove, 10), 1);
+      renderCart();
+    });
+  });
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('add-to-order')) {
+    const id = e.target.dataset.id;
+    const name = e.target.dataset.name;
+    const price = parseFloat(e.target.dataset.price);
+
+    const existing = cart.find(item => item.id === id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ id, name, price, quantity: 1, variant: '' });
+    }
+    renderCart();
+  }
+});
+
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  alert('Thanks for your order request! I\'ll get back to you personally soon.');
-  this.reset();
+
+  if (!cart.length) {
+    alert('Please add at least one product to your order first.');
+    return;
+  }
+
+  const submitBtn = e.target.querySelector('.submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  try {
+    const orderId = createOrderId();
+    const { error: orderError } = await supabaseClient
+      .from('orders')
+      .insert({
+        id: orderId,
+        customer_name: document.getElementById('custName').value,
+        email: document.getElementById('custEmail').value,
+        phone: document.getElementById('custPhone').value,
+        shipping_address: document.getElementById('custAddress').value,
+        notes: document.getElementById('custNotes').value
+      });
+
+    if (orderError) {
+      throw orderError;
+    }
+
+    let designFileUrl = null;
+    const fileInput = document.getElementById('designFile');
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const filePath = `${orderId}/${file.name}`;
+      const { error: uploadError } = await supabaseClient.storage
+        .from('design-uploads')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+      designFileUrl = filePath;
+    }
+
+    const itemsToInsert = cart.map(item => ({
+      order_id: orderId,
+      product_id: item.id,
+      quantity: item.quantity,
+      variant: item.variant || null,
+      design_file_url: designFileUrl
+    }));
+
+    const { error: itemsError } = await supabaseClient
+      .from('order_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) {
+      throw itemsError;
+    }
+
+    alert(`Order received! Reference #${orderId.slice(0, 8)}. Please send payment confirmation via WhatsApp or email.`);
+    cart = [];
+    renderCart();
+    e.target.reset();
+  } catch (err) {
+    console.error(err);
+    alert(`Something went wrong submitting your order: ${err.message}`);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Order Request';
+  }
 });
 
 // Add scroll animation
@@ -92,4 +285,9 @@ document.querySelectorAll('.product-card, .service-card, .value-card').forEach(e
   el.style.transform = 'translateY(20px)';
   el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
   observer.observe(el);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadProducts();
+  renderCart();
 });

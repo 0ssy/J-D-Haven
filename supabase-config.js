@@ -1,0 +1,3 @@
+// supabase-config.js
+const SUPABASE_URL = "https://fsrmvsenctarhrorttlm.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzcm12c2VuY3Rhcmhyb3J0dGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwNjU0ODQsImV4cCI6MjEwMDY0MTQ4NH0.NlODANjqKdPIDoQPJTIISrHIazXld-qbx0ZOZswwb_s";

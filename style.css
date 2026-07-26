@@ -381,6 +381,13 @@ header {
   color: var(--gray);
 }
 
+.product-price {
+  margin-top: 0.75rem;
+  margin-bottom: 0.9rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
 /* SERVICES SECTION */
 .services {
   background: var(--light);
@@ -505,6 +512,51 @@ header {
 .form-container {
   max-width: 600px;
   margin: 0 auto;
+}
+
+#cartSummary {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  background: var(--light);
+}
+
+#cartSummary p {
+  margin: 0;
+}
+
+.cart-list {
+  list-style: none;
+  margin-bottom: 0.75rem;
+}
+
+.cart-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(40, 43, 74, 0.15);
+}
+
+.cart-list li:last-child {
+  border-bottom: none;
+}
+
+.cart-list button {
+  border: 1px solid var(--gray-light);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dark);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cart-list button:hover {
+  border-color: var(--primary);
 }
 
 .form-grid {
@@ -797,6 +849,100 @@ footer {
   border-color: var(--primary);
 }
 
+[data-theme="dark"] #cartSummary {
+  border-color: rgba(238, 235, 218, 0.2);
+  background: rgba(238, 235, 218, 0.08);
+}
+
+[data-theme="dark"] .cart-list li {
+  border-bottom-color: rgba(238, 235, 218, 0.2);
+}
+
+[data-theme="dark"] .cart-list button {
+  color: var(--white);
+  border-color: rgba(238, 235, 218, 0.3);
+}
+
+/* ADMIN */
+.admin-page {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1rem 3rem;
+}
+
+.admin-panel {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.admin-panel h2 {
+  font-family: 'Outfit', sans-serif;
+  color: var(--dark);
+  margin-bottom: 1rem;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+#productsList,
+#ordersList {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-product-row {
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  padding: 0.8rem;
+  background: var(--light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.admin-product-row .btn {
+  padding: 0.45rem 0.8rem;
+}
+
+.admin-order-card {
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--light);
+}
+
+.admin-order-card p {
+  margin-bottom: 0.55rem;
+}
+
+.admin-order-card ul {
+  margin: 0.5rem 0 0.85rem 1rem;
+}
+
+.admin-order-card li {
+  margin-bottom: 0.4rem;
+}
+
+.admin-inline-btn {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  margin-left: 0.35rem;
+}
+
+[data-theme="dark"] .admin-panel,
+[data-theme="dark"] .admin-product-row,
+[data-theme="dark"] .admin-order-card {
+  border-color: rgba(238, 235, 218, 0.2);
+  background: rgba(238, 235, 218, 0.08);
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .hero-content {
@@ -872,5 +1018,9 @@ footer {
 
   .contact-channels {
     grid-template-columns: 1fr;
+  }
+
+  .admin-panel {
+    padding: 1rem;
   }
 }
