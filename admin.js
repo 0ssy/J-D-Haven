@@ -238,6 +238,7 @@ async function loadAdminProducts() {
 
   document.getElementById('productsList').innerHTML = products.map(p => `
     <div class="admin-product-row">
+      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" class="admin-product-thumb">` : '<div class="admin-product-thumb admin-product-thumb-empty">No image</div>'}
       <strong>${p.name}</strong> - KSh ${p.price} - ${p.categories?.name ?? 'Uncategorized'} - ${p.active ? 'Visible' : 'Hidden'} - ${p.in_stock === false ? 'Out of stock' : 'In stock'}${p.lead_time_days ? ` - ${p.lead_time_days}d lead time` : ''}
       <button class="btn btn-outline" data-toggle="${p.id}" data-active="${p.active}">
         ${p.active ? 'Hide' : 'Show'}
@@ -245,6 +246,8 @@ async function loadAdminProducts() {
       <button class="btn btn-outline" data-stock="${p.id}" data-in-stock="${p.in_stock === false ? 'false' : 'true'}">
         ${p.in_stock === false ? 'Mark In Stock' : 'Mark Out of Stock'}
       </button>
+      <button class="btn btn-outline" data-change-image="${p.id}">Edit Image</button>
+      <input type="file" accept="image/*" class="admin-image-input" data-image-input="${p.id}" data-current-image="${p.image_url ?? ''}">
       <button class="btn btn-outline" data-delete="${p.id}">Delete / Archive</button>
     </div>
   `).join('');
@@ -349,6 +352,61 @@ async function loadAdminProducts() {
         return;
       }
       showToast('Stock status updated.', 'success');
+      await loadAdminProducts();
+    });
+  });
+
+  document.querySelectorAll('[data-change-image]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const productId = btn.dataset.changeImage;
+      const fileInput = document.querySelector(`[data-image-input="${productId}"]`);
+      if (!(fileInput instanceof HTMLInputElement)) {
+        showToast('Could not open image picker for this product.', 'error');
+        return;
+      }
+      fileInput.click();
+    });
+  });
+
+  document.querySelectorAll('[data-image-input]').forEach(input => {
+    input.addEventListener('change', async () => {
+      if (!(input instanceof HTMLInputElement) || !input.files || input.files.length === 0) {
+        return;
+      }
+
+      const productId = input.dataset.imageInput;
+      const oldImageUrl = input.dataset.currentImage;
+      const imageFile = input.files[0];
+      const filePath = `${Date.now()}_${imageFile.name}`;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('product-images')
+        .upload(filePath, imageFile);
+      if (uploadError) {
+        showToast('Image upload failed: ' + uploadError.message, 'error');
+        return;
+      }
+
+      const { data: publicUrlData } = supabaseClient.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+      const newImageUrl = publicUrlData.publicUrl;
+
+      const { error: updateError } = await supabaseClient
+        .from('products')
+        .update({ image_url: newImageUrl })
+        .eq('id', productId);
+      if (updateError) {
+        showToast('Image updated upload succeeded, but database update failed: ' + updateError.message, 'error');
+        return;
+      }
+
+      const oldImagePath = getStoragePathFromPublicUrl(oldImageUrl, 'product-images');
+      if (oldImagePath) {
+        await supabaseClient.storage.from('product-images').remove([oldImagePath]);
+      }
+
+      showToast('Product image updated.', 'success');
       await loadAdminProducts();
     });
   });

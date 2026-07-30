@@ -100,6 +100,7 @@ let cart = [];
 let lastOrderSubmitAt = 0;
 let allProducts = [];
 let activeCategory = 'all';
+let productsRefreshIntervalId = null;
 
 function formatCurrency(amount) {
   return `KSh ${amount.toFixed(2)}`;
@@ -157,20 +158,31 @@ function renderOrderConfirmation(orderId, items, totalAmount) {
   confirmationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-async function sendOrderConfirmationEmail(payload) {
-  const { error } = await supabaseClient.functions.invoke('order-confirmation', {
-    body: payload
-  });
-
-  if (error) {
-    throw error;
-  }
-}
-
 function animateProductCards() {
   document.querySelectorAll('.product-card').forEach(el => {
     if (el.dataset.animated === 'true') {
       return;
+    }
+
+    function getAvailableProductIdSet(products) {
+      return new Set(products.filter(product => product.in_stock !== false).map(product => product.id));
+    }
+
+    function reconcileCartWithProducts() {
+      if (!cart.length) {
+        return;
+      }
+
+      const availableIds = getAvailableProductIdSet(allProducts);
+      const nextCart = cart.filter(item => availableIds.has(item.id));
+      const removedCount = cart.length - nextCart.length;
+      if (removedCount <= 0) {
+        return;
+      }
+
+      cart = nextCart;
+      renderCart();
+      showToast(`${removedCount} item${removedCount === 1 ? '' : 's'} removed from cart because they are no longer available.`, 'info', 5000);
     }
 
     el.style.opacity = '0';
@@ -286,6 +298,7 @@ async function loadProducts() {
 
   allProducts = products;
   renderProducts();
+  reconcileCartWithProducts();
 }
 
 function renderCart() {
@@ -377,8 +390,43 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
 
   try {
     lastOrderSubmitAt = now;
+    const productIds = [...new Set(cart.map(item => item.id))];
+    const { data: availableProducts, error: availabilityError } = await supabaseClient
+      .from('products')
+      .select('id')
+      .in('id', productIds)
+      .eq('active', true)
+      .eq('in_stock', true);
+
+    if (availabilityError) {
+      throw availabilityError;
+    }
+
+    const availableIds = new Set((availableProducts ?? []).map(product => product.id));
+    const unavailableItems = cart.filter(item => !availableIds.has(item.id));
+    if (unavailableItems.length > 0) {
+      cart = cart.filter(item => availableIds.has(item.id));
+      renderCart();
+      showToast('Some items were removed because they are no longer available. Please review your cart and submit again.', 'error', 5500);
+      return;
+    }
+
     const orderItemsSnapshot = cart.map(item => ({ ...item }));
     const totalAmount = orderItemsSnapshot.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const customItemRequest = document.getElementById('custCustomItem').value.trim();
+    const preferredColors = document.getElementById('custColors').value.trim();
+    const additionalNotes = document.getElementById('custNotes').value.trim();
+    const notesSections = [];
+    if (customItemRequest) {
+      notesSections.push(`Custom item request: ${customItemRequest}`);
+    }
+    if (preferredColors) {
+      notesSections.push(`Preferred colors: ${preferredColors}`);
+    }
+    if (additionalNotes) {
+      notesSections.push(`Additional notes: ${additionalNotes}`);
+    }
+    const compiledNotes = notesSections.join('\n');
     const orderId = createOrderId();
     const { error: orderError } = await supabaseClient
       .from('orders')
@@ -388,7 +436,7 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
         email: normalizedEmail,
         phone: document.getElementById('custPhone').value,
         shipping_address: document.getElementById('custAddress').value,
-        notes: document.getElementById('custNotes').value
+        notes: compiledNotes || null
       });
 
     if (orderError) {
@@ -428,19 +476,6 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
 
     renderOrderConfirmation(orderId, orderItemsSnapshot, totalAmount);
     showToast(`Order received! Reference #${orderId.slice(0, 8)}.`, 'success', 5000);
-
-    try {
-      await sendOrderConfirmationEmail({
-        orderId,
-        customerName: document.getElementById('custName').value.trim(),
-        customerEmail: normalizedEmail,
-        totalAmount
-      });
-      showToast('A confirmation email has been sent.', 'info');
-    } catch (emailError) {
-      console.error(emailError);
-      showToast('Order saved, but confirmation email could not be sent right now.', 'error', 5000);
-    }
 
     cart = [];
     renderCart();
@@ -494,4 +529,17 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCategories();
   loadProducts();
   renderCart();
+
+  if (productsRefreshIntervalId === null) {
+    productsRefreshIntervalId = window.setInterval(() => {
+      loadProducts();
+    }, 20000);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      loadProducts();
+      loadCategories();
+    }
+  });
 });
