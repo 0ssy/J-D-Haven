@@ -272,34 +272,7 @@ async function loadAdminProducts() {
   document.querySelectorAll('[data-delete]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const productId = btn.dataset.delete;
-      const { count: linkedOrderItemsCount, error: orderItemsCheckError } = await supabaseClient
-        .from('order_items')
-        .select('id', { count: 'exact', head: true })
-        .eq('product_id', productId);
-      if (orderItemsCheckError) {
-        showToast('Unable to verify product usage in orders: ' + orderItemsCheckError.message, 'error');
-        return;
-      }
-
-      const hasLinkedOrders = (linkedOrderItemsCount ?? 0) > 0;
-      const confirmMessage = hasLinkedOrders
-        ? 'This product is used in existing orders, so it cannot be fully deleted. Click OK to archive it (hide + out of stock).'
-        : 'This product has no linked orders. Click OK to permanently delete it.';
-      if (!confirm(confirmMessage)) {
-        return;
-      }
-
-      if (hasLinkedOrders) {
-        const { error: archiveError } = await supabaseClient
-          .from('products')
-          .update({ active: false, in_stock: false })
-          .eq('id', productId);
-        if (archiveError) {
-          showToast('Unable to archive product: ' + archiveError.message, 'error');
-          return;
-        }
-        showToast('Product is used in existing orders, so it was archived (hidden) instead of deleted.', 'info', 5000);
-        await loadAdminProducts();
+      if (!confirm('This will permanently delete the product and any order line-items linked to it. Continue?')) {
         return;
       }
 
@@ -310,6 +283,15 @@ async function loadAdminProducts() {
         .single();
       if (productFetchError) {
         showToast('Unable to load product details: ' + productFetchError.message, 'error');
+        return;
+      }
+
+      const { error: orderItemsDeleteError } = await supabaseClient
+        .from('order_items')
+        .delete()
+        .eq('product_id', productId);
+      if (orderItemsDeleteError) {
+        showToast('Unable to delete linked order items: ' + orderItemsDeleteError.message, 'error');
         return;
       }
 
